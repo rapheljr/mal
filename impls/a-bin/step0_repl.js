@@ -1,15 +1,19 @@
-const { stdin, stdout } = process;
+const readline = require('readline');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 const READ = (str) => str;
 const EVAL = (ast) => ast;
 const PRINT = (exp) => exp;
-const REP = (str) => PRINT(EVAL(READ(str)));
+const rep = (str) => PRINT(EVAL(READ(str)));
 
-stdin.setEncoding('utf-8');
-stdout.setEncoding('utf-8');
-stdout.write('user-> ');
+const REPL = () =>
+  rl.question('user-> ', (line) => {
+    console.log(rep(line));
+    REPL();
+  });
 
-stdin.on('data', (chunk) => {
-  stdout.write(REP(chunk));
-  stdout.write('user-> ');
-});
+REPL();
