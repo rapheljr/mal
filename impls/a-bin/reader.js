@@ -1,3 +1,5 @@
+const { MalValue, MalSymbol, MalList, MalVector } = require('./types');
+
 class Reader {
   constructor(tokens) {
     this.tokens = tokens;
@@ -20,22 +22,35 @@ const tokenize = (str) => {
   return [...str.matchAll(re)].map((x) => x[1]);
 };
 
-const readList = (reader) => {
+const readSeq = (reader, closingSymbol) => {
   reader.next();
   const ast = [];
-  while (reader.peek() !== ')') {
+  while (reader.peek() !== closingSymbol) {
+    if (!reader.peek()) {
+      throw new Error('unbalanced ' + closingSymbol);
+    }
     ast.push(readForm(reader));
   }
   reader.next();
   return ast;
 };
 
+const readList = (reader) => {
+  const ast = readSeq(reader, ')');
+  return new MalList(ast);
+};
+
+const readVector = (reader) => {
+  const ast = readSeq(reader, ']');
+  return new MalVector(ast);
+};
+
 const readAtom = (reader) => {
   const token = reader.next();
   if (token.match(/^-?[0-9]+$/)) {
-    return parseInt(token);
+    return new MalValue(parseInt(token));
   }
-  return token;
+  return new MalSymbol(token);
 };
 
 const readForm = (reader) => {
@@ -43,6 +58,8 @@ const readForm = (reader) => {
   switch (token) {
     case '(':
       return readList(reader);
+    case '[':
+      return readVector(reader);
     default:
       return readAtom(reader);
   }

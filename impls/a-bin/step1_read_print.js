@@ -14,7 +14,11 @@ const rep = (str) => PRINT(EVAL(READ(str)));
 
 const REPL = () =>
   rl.question('user-> ', (line) => {
-    console.log(rep(line));
+    try {
+      console.log(rep(line));
+    } catch (error) {
+      console.log(error);
+    }
     REPL();
   });
 

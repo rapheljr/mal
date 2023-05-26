@@ -1,8 +1,5 @@
 const printStr = (malValue) => {
-  if (Array.isArray(malValue)) {
-    return '(' + malValue.map(printStr).join(' ') + ')';
-  }
-  return malValue.toString();
+  return malValue.printStr();
 };
 
 module.exports = { printStr };
