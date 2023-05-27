@@ -1,5 +1,28 @@
 const chalk = require('chalk');
 
+const random = (limit = 10) => Math.floor(Math.random() * limit);
+
+const bracketColors = [
+  'red',
+  'blue',
+  'magenta',
+  'cyan',
+  'white',
+  'redBright',
+  'blueBright',
+  'magentaBright',
+  'cyanBright',
+  'whiteBright',
+];
+
+const getBracketColor = () => bracketColors[random(bracketColors.length)];
+
+const concat = (open, value, close) => {
+  const color = getBracketColor();
+  const content = value.map((x) => x.printStr()).join(' ');
+  return chalk[color](open) + content + chalk[color](close);
+};
+
 class MalValue {
   constructor(value) {
     this.value = value;
@@ -30,7 +53,11 @@ class MalList extends MalValue {
   }
 
   printStr() {
-    return '(' + this.value.map((x) => x.printStr()).join(' ') + ')';
+    return concat('(', this.value, ')');
+  }
+
+  isEmpty() {
+    return this.value.length === 0;
   }
 }
 
@@ -40,7 +67,7 @@ class MalVector extends MalValue {
   }
 
   printStr() {
-    return '[' + this.value.map((x) => x.printStr()).join(' ') + ']';
+    return concat('[', this.value, ']');
   }
 }
 
