@@ -1,4 +1,12 @@
-const { MalValue, MalSymbol, MalList, MalVector } = require('./types');
+const chalk = require('chalk');
+const {
+  MalValue,
+  MalSymbol,
+  MalList,
+  MalVector,
+  MalNil,
+  MalBool,
+} = require('./types');
 
 class Reader {
   constructor(tokens) {
@@ -27,7 +35,7 @@ const readSeq = (reader, closingSymbol) => {
   const ast = [];
   while (reader.peek() !== closingSymbol) {
     if (!reader.peek()) {
-      throw new Error('unbalanced ' + closingSymbol);
+      throw new Error(chalk.red('unbalanced ' + closingSymbol));
     }
     ast.push(readForm(reader));
   }
@@ -49,6 +57,15 @@ const readAtom = (reader) => {
   const token = reader.next();
   if (token.match(/^-?[0-9]+$/)) {
     return new MalValue(parseInt(token));
+  }
+  if (token === 'true') {
+    return new MalBool(token);
+  }
+  if (token === 'false') {
+    return new MalBool(token);
+  }
+  if (token === 'nil') {
+    return new MalNil();
   }
   return new MalSymbol(token);
 };

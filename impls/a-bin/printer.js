@@ -1,5 +1,10 @@
+const { MalValue } = require('./types');
+
 const printStr = (malValue) => {
-  return malValue.printStr();
+  if (malValue instanceof MalValue) {
+    return malValue.printStr();
+  }
+  return malValue.toString();
 };
 
 module.exports = { printStr };
