@@ -23,6 +23,17 @@ const concat = (open, value, close) => {
   return chalk[color](open) + content + chalk[color](close);
 };
 
+const concatMap = (value) => {
+  const color = getBracketColor();
+  const content = [];
+  value.forEach((x, i, a) => {
+    if (i % 2 === 0) {
+      content.push(chalk.magenta(x.printStr()) + ' ' + a[i + 1].printStr());
+    }
+  });
+  return chalk[color]('{') + content.join(', ') + chalk[color]('}');
+};
+
 class MalValue {
   constructor(value) {
     this.value = value;
@@ -47,13 +58,9 @@ class MalSymbol extends MalValue {
   }
 }
 
-class MalList extends MalValue {
+class MalStruct extends MalValue {
   constructor(value) {
     super(value);
-  }
-
-  printStr() {
-    return concat('(', this.value, ')');
   }
 
   isEmpty() {
@@ -61,13 +68,33 @@ class MalList extends MalValue {
   }
 }
 
-class MalVector extends MalValue {
+class MalList extends MalStruct {
+  constructor(value) {
+    super(value);
+  }
+
+  printStr() {
+    return concat('(', this.value, ')');
+  }
+}
+
+class MalVector extends MalStruct {
   constructor(value) {
     super(value);
   }
 
   printStr() {
     return concat('[', this.value, ']');
+  }
+}
+
+class MalMap extends MalStruct {
+  constructor(value) {
+    super(value);
+  }
+
+  printStr() {
+    return concatMap(this.value);
   }
 }
 
@@ -91,4 +118,12 @@ class MalNil extends MalValue {
   }
 }
 
-module.exports = { MalSymbol, MalValue, MalList, MalVector, MalNil, MalBool };
+module.exports = {
+  MalSymbol,
+  MalValue,
+  MalList,
+  MalVector,
+  MalNil,
+  MalBool,
+  MalMap,
+};

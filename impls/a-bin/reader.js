@@ -6,6 +6,7 @@ const {
   MalVector,
   MalNil,
   MalBool,
+  MalMap,
 } = require('./types');
 
 class Reader {
@@ -35,7 +36,7 @@ const readSeq = (reader, closingSymbol) => {
   const ast = [];
   while (reader.peek() !== closingSymbol) {
     if (!reader.peek()) {
-      throw new Error(chalk.red('unbalanced ' + closingSymbol));
+      throw new Error(chalk.red('Unbalanced ' + closingSymbol));
     }
     ast.push(readForm(reader));
   }
@@ -51,6 +52,15 @@ const readList = (reader) => {
 const readVector = (reader) => {
   const ast = readSeq(reader, ']');
   return new MalVector(ast);
+};
+
+const readMap = (reader) => {
+  const ast = readSeq(reader, '}');
+  if (ast.length % 2 !== 0) {
+    const lastAst = ast[ast.length - 1];
+    throw new Error(chalk.red('No pair found for ' + lastAst.printStr()));
+  }
+  return new MalMap(ast);
 };
 
 const readAtom = (reader) => {
@@ -77,6 +87,8 @@ const readForm = (reader) => {
       return readList(reader);
     case '[':
       return readVector(reader);
+    case '{':
+      return readMap(reader);
     default:
       return readAtom(reader);
   }
