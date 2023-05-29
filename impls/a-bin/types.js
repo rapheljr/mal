@@ -19,7 +19,7 @@ const getBracketColor = () => bracketColors[random(bracketColors.length)];
 
 const concat = (open, value, close) => {
   const color = getBracketColor();
-  const content = value.map((x) => x.printStr()).join(' ');
+  const content = value.map((x) => x.toString()).join(' ');
   return chalk[color](open) + content + chalk[color](close);
 };
 
@@ -28,7 +28,7 @@ const concatMap = (value) => {
   const content = [];
   value.forEach((x, i, a) => {
     if (i % 2 === 0) {
-      content.push(chalk.magenta(x.printStr()) + ' ' + a[i + 1].printStr());
+      content.push(chalk.magenta(x.toString()) + ' ' + a[i + 1].toString());
     }
   });
   return chalk[color]('{') + content.join(', ') + chalk[color]('}');
@@ -39,7 +39,7 @@ class MalValue {
     this.value = value;
   }
 
-  printStr() {
+  toString() {
     return chalk.yellow(this.value.toString());
   }
 
@@ -53,7 +53,7 @@ class MalSymbol extends MalValue {
     super(value);
   }
 
-  printStr() {
+  toString() {
     return chalk.green(this.value.toString());
   }
 }
@@ -73,7 +73,7 @@ class MalList extends MalStruct {
     super(value);
   }
 
-  printStr() {
+  toString() {
     return concat('(', this.value, ')');
   }
 }
@@ -83,7 +83,7 @@ class MalVector extends MalStruct {
     super(value);
   }
 
-  printStr() {
+  toString() {
     return concat('[', this.value, ']');
   }
 }
@@ -93,7 +93,7 @@ class MalMap extends MalStruct {
     super(value);
   }
 
-  printStr() {
+  toString() {
     return concatMap(this.value);
   }
 }
@@ -103,7 +103,7 @@ class MalBool extends MalValue {
     super(value);
   }
 
-  printStr() {
+  toString() {
     return chalk.blue(this.value);
   }
 }
@@ -113,7 +113,7 @@ class MalNil extends MalValue {
     super(null);
   }
 
-  printStr() {
+  toString() {
     return chalk.grey('nil');
   }
 }
