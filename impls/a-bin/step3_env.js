@@ -54,6 +54,12 @@ const EVAL = (ast, env) => {
     case 'def!':
       env.set(ast.value[1], EVAL(ast.value[2], env));
       return env.get(ast.value[1]);
+
+    case 'let*':
+      const letEnv = new Env(env);
+      const bind = ast.value[1];
+      letEnv.set(bind.value[0], EVAL(bind.value[1], letEnv));
+      return EVAL(ast.value[2], letEnv);
   }
 
   const [fn, ...args] = evalAst(ast, env).value;

@@ -22,7 +22,7 @@ class Env {
     if (!env) {
       throw new Error(`${symbol.value} not found`);
     }
-    return this.data[symbol.value];
+    return env.data[symbol.value];
   }
   equals(another) {
     return another instanceof Env;
