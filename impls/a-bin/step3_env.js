@@ -57,8 +57,10 @@ const EVAL = (ast, env) => {
 
     case 'let*':
       const letEnv = new Env(env);
-      const bind = ast.value[1];
-      letEnv.set(bind.value[0], EVAL(bind.value[1], letEnv));
+      const bindings = ast.value[1].value;
+      for (let i = 0; i < bindings.length; i += 2) {
+        letEnv.set(bindings[i], EVAL(bindings[i + 1], letEnv));
+      }
       return EVAL(ast.value[2], letEnv);
   }
 
