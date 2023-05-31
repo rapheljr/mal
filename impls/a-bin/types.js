@@ -118,6 +118,20 @@ class MalNil extends MalValue {
   }
 }
 
+class MalFn extends MalValue {
+  constructor(value) {
+    super(value);
+  }
+
+  toString() {
+    return chalk.cyanBright('#<function>');
+  }
+
+  apply(_, args) {
+    return this.value(...args);
+  }
+}
+
 module.exports = {
   MalSymbol,
   MalValue,
@@ -126,4 +140,5 @@ module.exports = {
   MalNil,
   MalBool,
   MalMap,
+  MalFn,
 };

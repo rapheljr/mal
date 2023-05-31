@@ -69,10 +69,10 @@ const readAtom = (reader) => {
     return new MalValue(parseInt(token));
   }
   if (token === 'true') {
-    return new MalBool(token);
+    return new MalBool(true);
   }
   if (token === 'false') {
-    return new MalBool(token);
+    return new MalBool(false);
   }
   if (token === 'nil') {
     return new MalNil();

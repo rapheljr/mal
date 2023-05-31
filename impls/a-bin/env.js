@@ -1,7 +1,17 @@
+const { MalValue } = require('./types');
+
 class Env {
-  constructor(outer) {
+  constructor(outer, binds = [], exprs = []) {
     this.outer = outer;
+    this.binds = binds;
+    this.exprs = exprs;
     this.data = {};
+  }
+
+  bind(args) {
+    args.forEach((exp, i) => {
+      this.set(this.binds.value[i], exp);
+    });
   }
 
   set(symbol, malValue) {
