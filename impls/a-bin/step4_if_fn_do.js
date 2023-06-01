@@ -10,8 +10,11 @@ const {
   MalNil,
   MalBool,
   MalFn,
+  MalStruct,
+  MalString,
 } = require('./types');
 const { Env } = require('./env');
+const chalk = require('chalk');
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -39,15 +42,6 @@ const evalAst = (ast, env) => {
   }
 
   return ast;
-};
-
-const evalListInSeq = (ast, cb) => {
-  return ast.value.map((val) => {
-    if (val instanceof MalList) {
-      return cb(val, env);
-    }
-    return val;
-  });
 };
 
 const READ = (str) => readStr(str);
@@ -119,7 +113,12 @@ const multipleCheck = (args, predicate) => {
 
 const env = new Env();
 env.set(new MalSymbol('+'), (...args) =>
-  args.reduce((a, b) => new MalValue(a.value + b.value))
+  args.reduce((a, b) => {
+    if (a instanceof MalStruct) {
+      return new MalString(a.value + b.value);
+    }
+    return new MalValue(a.value + b.value);
+  })
 );
 env.set(new MalSymbol('-'), (...args) =>
   args.reduce((a, b) => new MalValue(a.value - b.value))
@@ -131,13 +130,25 @@ env.set(new MalSymbol('/'), (...args) =>
   args.reduce((a, b) => new MalValue(a.value / b.value))
 );
 env.set(new MalSymbol('not'), (a) => new MalBool(!a.value));
+env.set(
+  new MalSymbol('str'),
+  (...args) => new MalString(args.map((arg) => arg.value).join(''))
+);
+env.set(
+  new MalSymbol('pr-str'),
+  (...args) => new MalString(args.map((arg) => arg.toString()).join(''))
+);
 env.set(new MalSymbol('list'), (...a) => new MalList(a));
 env.set(new MalSymbol('list?'), (a) => a instanceof MalList);
 env.set(new MalSymbol('vector'), (...a) => new MalVector(a));
 env.set(new MalSymbol('vector?'), (a) => a instanceof MalVector);
-env.set(new MalSymbol('count'), (a) => new MalValue(a.value.length));
+env.set(new MalSymbol('count'), (a) => new MalValue(a.value?.length));
 env.set(new MalSymbol('empty?'), (a) => new MalBool(a.value.length === 0));
 env.set(new MalSymbol('prn'), (...args) => {
+  console.log(...takeValues(args));
+  return new MalNil();
+});
+env.set(new MalSymbol('println'), (...args) => {
   console.log(...takeValues(args));
   return new MalNil();
 });
@@ -164,7 +175,7 @@ const REPL = () =>
     try {
       console.log(rep(line));
     } catch (error) {
-      console.log(error);
+      console.log(chalk.red(error.message));
     }
     REPL();
   });

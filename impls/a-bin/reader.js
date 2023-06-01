@@ -7,6 +7,8 @@ const {
   MalNil,
   MalBool,
   MalMap,
+  MalKeyword,
+  MalString,
 } = require('./types');
 
 class Reader {
@@ -36,7 +38,7 @@ const readSeq = (reader, closingSymbol) => {
   const ast = [];
   while (reader.peek() !== closingSymbol) {
     if (!reader.peek()) {
-      throw new Error(chalk.red('Unbalanced ' + closingSymbol));
+      throw new Error('Unbalanced ' + closingSymbol);
     }
     ast.push(readForm(reader));
   }
@@ -58,15 +60,26 @@ const readMap = (reader) => {
   const ast = readSeq(reader, '}');
   if (ast.length % 2 !== 0) {
     const lastAst = ast[ast.length - 1];
-    throw new Error(chalk.red('No pair found for ' + lastAst.printStr()));
+    throw new Error('No pair found for ' + lastAst.toString());
   }
   return new MalMap(ast);
 };
 
+const parseStr = (str) => str.slice(1, -1);
+
 const readAtom = (reader) => {
   const token = reader.next();
-  if (token.match(/^-?[0-9]+$/)) {
+  if (token.match(/^-?[\d]+$/)) {
     return new MalValue(parseInt(token));
+  }
+  if (token.match(/^-?[\d]+.[\d]+$/)) {
+    return new MalValue(parseFloat(token));
+  }
+  if (token.startsWith(':')) {
+    return new MalKeyword(token);
+  }
+  if (token.startsWith('"') && token.endsWith('"')) {
+    return new MalString(parseStr(token));
   }
   if (token === 'true') {
     return new MalBool(true);

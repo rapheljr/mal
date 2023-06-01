@@ -5,11 +5,13 @@ const random = (limit = 10) => Math.floor(Math.random() * limit);
 const bracketColors = [
   'red',
   'blue',
-  'magenta',
   'cyan',
+  'green',
   'white',
+  'magenta',
   'redBright',
   'blueBright',
+  'greenBright',
   'magentaBright',
   'cyanBright',
   'whiteBright',
@@ -54,7 +56,7 @@ class MalSymbol extends MalValue {
   }
 
   toString() {
-    return chalk.green(this.value.toString());
+    return chalk.white(this.value.toString());
   }
 }
 
@@ -118,6 +120,26 @@ class MalNil extends MalValue {
   }
 }
 
+class MalKeyword extends MalValue {
+  constructor(value) {
+    super(value);
+  }
+
+  toString() {
+    return chalk.magenta(this.value.toString());
+  }
+}
+
+class MalString extends MalValue {
+  constructor(value) {
+    super(value);
+  }
+
+  toString() {
+    return chalk.greenBright(`"` + this.value.toString() + `"`);
+  }
+}
+
 class MalFn extends MalValue {
   constructor(value) {
     super(value);
@@ -141,4 +163,7 @@ module.exports = {
   MalBool,
   MalMap,
   MalFn,
+  MalKeyword,
+  MalString,
+  MalStruct,
 };
