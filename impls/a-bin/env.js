@@ -1,4 +1,4 @@
-const { MalValue } = require('./types');
+const { MalValue, MalList } = require('./types');
 
 class Env {
   constructor(outer, binds = [], exprs = []) {
@@ -9,9 +9,19 @@ class Env {
   }
 
   bind(args) {
-    args.forEach((exp, i) => {
-      this.set(this.binds.value[i], exp);
-    });
+    const params = this.binds.value.length;
+
+    for (let i = 0; i < params; i++) {
+      const value = this.binds.value[i].value;
+
+      if (value === '&') {
+        const symbol = this.binds.value[i + 1];
+        const rest = args.slice(i);
+        return this.set(symbol, new MalList(rest));
+      }
+
+      this.set(this.binds.value[i], args[i]);
+    }
   }
 
   set(symbol, malValue) {
