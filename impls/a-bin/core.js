@@ -68,7 +68,7 @@ env.set(
       args
         .map((arg) => {
           if (arg instanceof MalStruct) {
-            return arg.toString();
+            return arg.toString().replaceAll('"', '').replaceAll('\\', '\\"');
           }
           return arg.value;
         })

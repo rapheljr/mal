@@ -140,9 +140,11 @@ class MalString extends MalValue {
   }
 }
 
-class MalFn extends MalValue {
-  constructor(value) {
-    super(value);
+class MalFun extends MalValue {
+  constructor(ast, binds, env) {
+    super(ast);
+    this.binds = binds;
+    this.env = env;
   }
 
   toString() {
@@ -162,7 +164,7 @@ module.exports = {
   MalNil,
   MalBool,
   MalMap,
-  MalFn,
+  MalFun,
   MalKeyword,
   MalString,
   MalStruct,
