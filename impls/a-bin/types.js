@@ -19,9 +19,21 @@ const bracketColors = [
 
 const getBracketColor = () => bracketColors[random(bracketColors.length)];
 
+const printStr = (val, printReadably = false) => {
+  if (val instanceof MalValue) {
+    return val.toString(printReadably);
+  }
+
+  if (val instanceof Function) {
+    return chalk.cyanBright('#<function>');
+  }
+
+  return val.toString();
+};
+
 const concat = (open, value, close) => {
   const color = getBracketColor();
-  const content = value.map((x) => x.toString()).join(' ');
+  const content = value.map((x) => printStr(x)).join(' ');
   return chalk[color](open) + content + chalk[color](close);
 };
 
@@ -30,7 +42,7 @@ const concatMap = (value) => {
   const content = [];
   value.forEach((x, i, a) => {
     if (i % 2 === 0) {
-      content.push(chalk.magenta(x.toString()) + ' ' + a[i + 1].toString());
+      content.push(chalk.magenta(x.toString(true)) + ' ' + a[i + 1].toString());
     }
   });
   return chalk[color]('{') + content.join(', ') + chalk[color]('}');
@@ -41,7 +53,7 @@ class MalValue {
     this.value = value;
   }
 
-  toString() {
+  toString(printReadably) {
     return chalk.yellow(this.value.toString());
   }
 
@@ -55,8 +67,32 @@ class MalSymbol extends MalValue {
     super(value);
   }
 
-  toString() {
+  toString(printReadably) {
     return chalk.white(this.value.toString());
+  }
+}
+
+class MalAtom extends MalValue {
+  constructor(value) {
+    super(value);
+  }
+
+  toString() {
+    return chalk.cyanBright('(atom ' + printStr(this.value, true) + ')');
+  }
+
+  deref() {
+    return this.value;
+  }
+
+  reset(value) {
+    this.value = value;
+    return this.value;
+  }
+
+  swap(fun, args) {
+    this.value = fun.apply(null, [this.value, ...args]);
+    return this.value;
   }
 }
 
@@ -70,7 +106,13 @@ class MalStruct extends MalValue {
   }
 }
 
-class MalList extends MalStruct {
+class MalIterable extends MalStruct {
+  constructor(value) {
+    super(value);
+  }
+}
+
+class MalList extends MalIterable {
   constructor(value) {
     super(value);
   }
@@ -80,7 +122,7 @@ class MalList extends MalStruct {
   }
 }
 
-class MalVector extends MalStruct {
+class MalVector extends MalIterable {
   constructor(value) {
     super(value);
   }
@@ -135,16 +177,26 @@ class MalString extends MalValue {
     super(value);
   }
 
-  toString() {
-    return chalk.greenBright(`"` + this.value.toString() + `"`);
+  toString(printReadably = false) {
+    if (printReadably) {
+      return (
+        '"' +
+        this.value
+          .replace(/\\/g, '\\')
+          .replace(/"/g, '"')
+          .replace(/\n/g, '\\n') +
+        '"'
+      );
+    }
+    return this.value.toString();
   }
 }
-
 class MalFun extends MalValue {
-  constructor(ast, binds, env) {
+  constructor(ast, binds, env, fun = () => {}) {
     super(ast);
     this.binds = binds;
     this.env = env;
+    this.fun = fun;
   }
 
   toString() {
@@ -152,7 +204,7 @@ class MalFun extends MalValue {
   }
 
   apply(_, args) {
-    return this.value(...args);
+    return this.fun.apply(null, args);
   }
 }
 
@@ -168,4 +220,6 @@ module.exports = {
   MalKeyword,
   MalString,
   MalStruct,
+  MalAtom,
+  printStr,
 };

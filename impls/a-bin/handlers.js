@@ -42,7 +42,11 @@ const handleIf = (ast, env, EVAL) => {
 const handleFun = (ast, env, EVAL) => {
   const [, binds, ...exprs] = ast.value;
   const doForms = new MalList([new MalSymbol('do'), ...exprs]);
-  return new MalFun(doForms, binds.value, env);
+  const fun = (...args) => {
+    const funEnv = new Env(env, binds.value, args);
+    return EVAL(ast.value[2], funEnv);
+  };
+  return new MalFun(doForms, binds.value, env, fun);
 };
 
 module.exports = { handleDef, handleLet, handleDo, handleIf, handleFun };

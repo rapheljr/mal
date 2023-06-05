@@ -1,4 +1,3 @@
-const chalk = require('chalk');
 const {
   MalValue,
   MalSymbol,
@@ -26,6 +25,22 @@ class Reader {
     return another instanceof Reader;
   }
 }
+
+const createMalString = (token) => {
+  const newStr = token
+    .slice(1, token.length - 1)
+    .replace(/\\(.)/g, function (_, c) {
+      return c === 'n' ? '\n' : c;
+    });
+  return new MalString(newStr);
+};
+
+const prependSymbol = (reader, str) => {
+  reader.next();
+  const symbol = new MalSymbol(str);
+  const newAst = readForm(reader);
+  return new MalList([symbol, newAst]);
+};
 
 const tokenize = (str) => {
   const re =
@@ -78,8 +93,11 @@ const readAtom = (reader) => {
   if (token.startsWith(':')) {
     return new MalKeyword(token);
   }
+  if (token.startsWith(';')) {
+    return new MalNil();
+  }
   if (token.startsWith('"') && token.endsWith('"')) {
-    return new MalString(parseStr(token));
+    return createMalString(token);
   }
   if (token === 'true') {
     return new MalBool(true);
@@ -102,6 +120,8 @@ const readForm = (reader) => {
       return readVector(reader);
     case '{':
       return readMap(reader);
+    case '@':
+      return prependSymbol(reader, 'deref');
     default:
       return readAtom(reader);
   }
