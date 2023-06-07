@@ -45,8 +45,9 @@ const ns = {
   '/': (...args) => args.reduce((a, b) => new MalValue(a.value / b.value)),
   '>': (...args) => multipleCheck(takeValues(args), (a, b) => a > b),
   '<': (...args) => multipleCheck(takeValues(args), (a, b) => a < b),
-  '=': (...args) =>
-    multipleCheck(takeValues(args), (a, b) => isDeepStrictEqual(a, b)),
+  '=': (...args) => args.every((arg) => isDeepStrictEqual(arg, args[0])),
+  // '=': (...args) =>
+  //   multipleCheck(takeValues(args), (a, b) => isDeepStrictEqual(a, b)),
   '>=': (...args) => multipleCheck(takeValues(args), (a, b) => a >= b),
   '<=': (...args) => multipleCheck(takeValues(args), (a, b) => a <= b),
   not: (a) => {
@@ -84,6 +85,9 @@ const ns = {
   deref: (atom) => atom.deref(),
   'reset!': (atom, val) => atom.reset(val),
   'swap!': (atom, fun, ...args) => atom.swap(fun, args),
+  cons: (val, list) => new MalList([val, ...list.value]),
+  concat: (...list) => new MalList(list.flatMap((x) => x.value)),
+  vec: (list) => new MalVector(list.value.slice()),
 };
 
 module.exports = { ns };

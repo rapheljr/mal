@@ -8,6 +8,7 @@ const {
   MalMap,
   MalKeyword,
   MalString,
+  MalNumber,
 } = require('./types');
 
 class Reader {
@@ -26,14 +27,10 @@ class Reader {
   }
 }
 
-const createMalString = (token) => {
-  const newStr = token
-    .slice(1, token.length - 1)
-    .replace(/\\(.)/g, function (_, c) {
-      return c === 'n' ? '\n' : c;
-    });
-  return new MalString(newStr);
-};
+const parseStr = (str) =>
+  str
+    .slice(1, str.length - 1)
+    .replace(/\\(.)/g, (_, c) => (c === 'n' ? '\n' : c));
 
 const prependSymbol = (reader, str) => {
   reader.next();
@@ -80,8 +77,6 @@ const readMap = (reader) => {
   return new MalMap(ast);
 };
 
-const parseStr = (str) => str.slice(1, -1);
-
 const readAtom = (reader) => {
   const token = reader.next();
   if (token.match(/^-?[\d]+$/)) {
@@ -97,7 +92,7 @@ const readAtom = (reader) => {
     return new MalNil();
   }
   if (token.startsWith('"') && token.endsWith('"')) {
-    return createMalString(token);
+    return new MalString(parseStr(token));
   }
   if (token === 'true') {
     return new MalBool(true);
@@ -122,6 +117,14 @@ const readForm = (reader) => {
       return readMap(reader);
     case '@':
       return prependSymbol(reader, 'deref');
+    case `'`:
+      return prependSymbol(reader, 'quote');
+    case '`':
+      return prependSymbol(reader, 'quasiquote');
+    case '~':
+      return prependSymbol(reader, 'unquote');
+    case '~@':
+      return prependSymbol(reader, 'splice-unquote');
     default:
       return readAtom(reader);
   }

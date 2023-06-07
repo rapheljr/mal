@@ -31,18 +31,20 @@ const printStr = (val, printReadably = false) => {
   return val.toString();
 };
 
-const concat = (open, value, close) => {
+const concat = (open, value, close, printReadably) => {
   const color = getBracketColor();
-  const content = value.map((x) => printStr(x)).join(' ');
+  const content = value.map((x) => printStr(x, printReadably)).join(' ');
   return chalk[color](open) + content + chalk[color](close);
 };
 
-const concatMap = (value) => {
+const concatMap = (value, printReadably) => {
   const color = getBracketColor();
   const content = [];
   value.forEach((x, i, a) => {
     if (i % 2 === 0) {
-      content.push(chalk.magenta(x.toString(true)) + ' ' + a[i + 1].toString());
+      content.push(
+        chalk.magenta(x.toString(true)) + ' ' + a[i + 1].toString(printReadably)
+      );
     }
   });
   return chalk[color]('{') + content.join(', ') + chalk[color]('}');
@@ -62,13 +64,23 @@ class MalValue {
   }
 }
 
+class MalNumber extends MalValue {
+  constructor(value) {
+    this.value = value;
+  }
+
+  toString(printReadably) {
+    return chalk.yellow(this.value.toString());
+  }
+}
+
 class MalSymbol extends MalValue {
   constructor(value) {
     super(value);
   }
 
   toString(printReadably) {
-    return chalk.white(this.value.toString());
+    return chalk.white(this.value.toString(printReadably));
   }
 }
 
@@ -110,6 +122,10 @@ class MalIterable extends MalStruct {
   constructor(value) {
     super(value);
   }
+
+  beginsWith(symbol) {
+    return this.value.length > 0 && this.value[0] === symbol;
+  }
 }
 
 class MalList extends MalIterable {
@@ -117,8 +133,8 @@ class MalList extends MalIterable {
     super(value);
   }
 
-  toString() {
-    return concat('(', this.value, ')');
+  toString(printReadably) {
+    return concat('(', this.value, ')', printReadably);
   }
 }
 
@@ -127,8 +143,8 @@ class MalVector extends MalIterable {
     super(value);
   }
 
-  toString() {
-    return concat('[', this.value, ']');
+  toString(printReadably) {
+    return concat('[', this.value, ']', printReadably);
   }
 }
 
@@ -137,8 +153,8 @@ class MalMap extends MalStruct {
     super(value);
   }
 
-  toString() {
-    return concatMap(this.value);
+  toString(printReadably) {
+    return concatMap(this.value, printReadably);
   }
 }
 
@@ -179,13 +195,13 @@ class MalString extends MalValue {
 
   toString(printReadably = false) {
     if (printReadably) {
-      return (
+      return chalk.greenBright(
         '"' +
-        this.value
-          .replace(/\\/g, '\\')
-          .replace(/"/g, '"')
-          .replace(/\n/g, '\\n') +
-        '"'
+          this.value
+            .replace(/\\/g, '\\')
+            .replace(/"/g, '"')
+            .replace(/\n/g, '\\n') +
+          '"'
       );
     }
     return this.value.toString();
