@@ -13,6 +13,34 @@ const handleDef = (ast, env, EVAL) => {
   return env.get(ast.value[1]);
 };
 
+const handleDefMac = (ast, env, EVAL) => {
+  const macro = EVAL(ast.value[2], env);
+  macro.isMacro = true;
+  env.set(ast.value[1], macro);
+  return env.get(ast.value[1]);
+};
+
+const isMacroCall = (ast, env) => {
+  try {
+    return (
+      ast instanceof MalList &&
+      !ast.isEmpty() &&
+      ast.value[0] instanceof MalSymbol &&
+      env.get(ast.value[0]).isMacro
+    );
+  } catch (error) {
+    return false;
+  }
+};
+
+const macroExpand = (ast, env) => {
+  while (isMacroCall(ast, env)) {
+    const macro = env.get(ast.value[0]);
+    ast = macro.apply(null, ast.value.slice(1));
+  }
+  return ast;
+};
+
 const handleLet = (ast, env, EVAL) => {
   const letEnv = new Env(env);
   const [bindings, ...forms] = ast.value.slice(1);
@@ -74,14 +102,14 @@ const getResult = (ast) => {
 
 const handleQQ = (ast) => {
   if (beginsWith(ast, 'unquote')) return ast.value[1];
+  if (ast instanceof MalSymbol || ast instanceof MalMap)
+    return new MalList([new MalSymbol('quote'), ast]);
   if (ast instanceof MalList) {
     return getResult(ast);
   }
   if (ast instanceof MalVector) {
     return new MalList([new MalSymbol('vec'), getResult(ast)]);
   }
-  if (ast instanceof MalSymbol || ast instanceof MalMap)
-    return new MalList([new MalSymbol('quote'), ast]);
   return ast;
 };
 
@@ -92,4 +120,7 @@ module.exports = {
   handleIf,
   handleFun,
   handleQQ,
+  handleDefMac,
+  isMacroCall,
+  macroExpand,
 };

@@ -7,6 +7,7 @@ const {
   MalBool,
   MalString,
   MalAtom,
+  MalIterable,
 } = require('./types');
 const { isDeepStrictEqual } = require('util');
 const { readStr } = require('./reader');
@@ -23,22 +24,7 @@ const multipleCheck = (args, predicate) => {
 };
 
 const ns = {
-  '+': (...args) =>
-    args.reduce((a, b) => {
-      if (a instanceof MalString) {
-        if (b instanceof MalString) {
-          return new MalString(a.value + b.value);
-        }
-        return new MalString(a.value + b.toString());
-      }
-      if (b instanceof MalString) {
-        if (a instanceof MalString) {
-          return new MalString(a.value + b.value);
-        }
-        return new MalString(a.toString() + b.value);
-      }
-      return new MalValue(a.value + b.value);
-    }),
+  '+': (...args) => args.reduce((a, b) => new MalValue(a.value + b.value)),
   '-': (...args) => args.reduce((a, b) => new MalValue(a.value - b.value)),
   '*': (...args) => args.reduce((a, b) => new MalValue(a.value * b.value)),
   '%': (...args) => args.reduce((a, b) => new MalValue(a.value % b.value)),
@@ -88,6 +74,9 @@ const ns = {
   cons: (val, list) => new MalList([val, ...list.value]),
   concat: (...list) => new MalList(list.flatMap((x) => x.value)),
   vec: (list) => new MalVector(list.value.slice()),
+  nth: (list, n) => list.nth(n),
+  first: (list) => (list instanceof MalNil ? list : list.first()),
+  rest: (list) => (list instanceof MalNil ? new MalList([]) : list.rest()),
 };
 
 module.exports = { ns };

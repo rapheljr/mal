@@ -126,6 +126,22 @@ class MalIterable extends MalStruct {
   beginsWith(symbol) {
     return this.value.length > 0 && this.value[0] === symbol;
   }
+
+  nth(n) {
+    if (n >= this.value.length) return new Error('index out of range');
+    return this.value[n];
+  }
+
+  first() {
+    if (this.isEmpty()) {
+      new MalNil();
+    }
+    return this.value[0];
+  }
+
+  rest() {
+    return new MalList(this.value.slice(1));
+  }
 }
 
 class MalList extends MalIterable {
@@ -208,11 +224,12 @@ class MalString extends MalValue {
   }
 }
 class MalFun extends MalValue {
-  constructor(ast, binds, env, fun = () => {}) {
+  constructor(ast, binds, env, fun = () => {}, isMacro = false) {
     super(ast);
     this.binds = binds;
     this.env = env;
     this.fun = fun;
+    this.isMacro = isMacro;
   }
 
   toString() {
@@ -238,4 +255,5 @@ module.exports = {
   MalStruct,
   MalAtom,
   printStr,
+  MalIterable,
 };
