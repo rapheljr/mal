@@ -1,5 +1,12 @@
 const { Env } = require('./env');
-const { MalFun, MalNil, MalList, MalSymbol } = require('./types');
+const {
+  MalFun,
+  MalNil,
+  MalList,
+  MalSymbol,
+  MalMap,
+  MalVector,
+} = require('./types');
 
 const handleDef = (ast, env, EVAL) => {
   env.set(ast.value[1], EVAL(ast.value[2], env));
@@ -49,4 +56,40 @@ const handleFun = (ast, env, EVAL) => {
   return new MalFun(doForms, binds.value, env, fun);
 };
 
-module.exports = { handleDef, handleLet, handleDo, handleIf, handleFun };
+const beginsWith = (ast, symbol) =>
+  ast instanceof MalList && ast.beginsWith(symbol);
+
+const getResult = (ast) => {
+  let result = new MalList([]);
+  for (let index = ast.value.length - 1; index >= 0; index--) {
+    const elt = ast.value[index];
+    if (beginsWith(elt, 'splice-unquote')) {
+      result = new MalList([new MalSymbol('concat'), elt.value[1], result]);
+    } else {
+      result = new MalList([new MalSymbol('cons'), handleQQ(elt), result]);
+    }
+  }
+  return result;
+};
+
+const handleQQ = (ast) => {
+  if (beginsWith(ast, 'unquote')) return ast.value[1];
+  if (ast instanceof MalList) {
+    return getResult(ast);
+  }
+  if (ast instanceof MalVector) {
+    return new MalList([new MalSymbol('vec'), getResult(ast)]);
+  }
+  if (ast instanceof MalSymbol || ast instanceof MalMap)
+    return new MalList([new MalSymbol('quote'), ast]);
+  return ast;
+};
+
+module.exports = {
+  handleDef,
+  handleLet,
+  handleDo,
+  handleIf,
+  handleFun,
+  handleQQ,
+};
