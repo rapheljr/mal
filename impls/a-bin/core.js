@@ -1,13 +1,12 @@
 const fs = require('fs');
 const {
   MalList,
-  MalValue,
   MalVector,
   MalNil,
   MalBool,
   MalString,
   MalAtom,
-  MalIterable,
+  MalNumber,
 } = require('./types');
 const { isDeepStrictEqual } = require('util');
 const { readStr } = require('./reader');
@@ -24,16 +23,14 @@ const multipleCheck = (args, predicate) => {
 };
 
 const ns = {
-  '+': (...args) => args.reduce((a, b) => new MalValue(a.value + b.value)),
-  '-': (...args) => args.reduce((a, b) => new MalValue(a.value - b.value)),
-  '*': (...args) => args.reduce((a, b) => new MalValue(a.value * b.value)),
-  '%': (...args) => args.reduce((a, b) => new MalValue(a.value % b.value)),
-  '/': (...args) => args.reduce((a, b) => new MalValue(a.value / b.value)),
+  '+': (...args) => args.reduce((a, b) => new MalNumber(a.value + b.value)),
+  '-': (...args) => args.reduce((a, b) => new MalNumber(a.value - b.value)),
+  '*': (...args) => args.reduce((a, b) => new MalNumber(a.value * b.value)),
+  '%': (...args) => args.reduce((a, b) => new MalNumber(a.value % b.value)),
+  '/': (...args) => args.reduce((a, b) => new MalNumber(a.value / b.value)),
   '>': (...args) => multipleCheck(takeValues(args), (a, b) => a > b),
   '<': (...args) => multipleCheck(takeValues(args), (a, b) => a < b),
   '=': (...args) => args.every((arg) => isDeepStrictEqual(arg, args[0])),
-  // '=': (...args) =>
-  //   multipleCheck(takeValues(args), (a, b) => isDeepStrictEqual(a, b)),
   '>=': (...args) => multipleCheck(takeValues(args), (a, b) => a >= b),
   '<=': (...args) => multipleCheck(takeValues(args), (a, b) => a <= b),
   not: (a) => {
@@ -50,7 +47,7 @@ const ns = {
   'list?': (a) => a instanceof MalList,
   vector: (...a) => new MalVector(a),
   'vector?': (a) => a instanceof MalVector,
-  count: (a) => new MalValue(a.value?.length),
+  count: (a) => new MalNumber(a.value?.length),
   'empty?': (a) => new MalBool(a.value.length === 0),
   'pr-str': (...args) => {
     const text = args.map((arg) => arg.toString()).join(' ');

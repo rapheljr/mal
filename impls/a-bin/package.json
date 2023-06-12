@@ -1,7 +1,7 @@
 {
   "name": "mal",
   "version": "1.0.0",
-  "main": "step2_eval.js",
+  "main": "index.js",
   "repository": "https://github.com/rapheljr/mal.git",
   "author": "Abin <86885009+rapheljr@users.noreply.github.com>",
   "license": "MIT",

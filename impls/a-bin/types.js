@@ -2,6 +2,8 @@ const chalk = require('chalk');
 
 const random = (limit = 10) => Math.floor(Math.random() * limit);
 
+const colors = ['violet', 'indigo', 'blue', 'green', 'yellow', 'orange', 'red'];
+
 const bracketColors = [
   'red',
   'blue',
@@ -55,8 +57,8 @@ class MalValue {
     this.value = value;
   }
 
-  toString(printReadably) {
-    return chalk.yellow(this.value.toString());
+  toString() {
+    return this.value.toString();
   }
 
   equals(another) {
@@ -66,10 +68,10 @@ class MalValue {
 
 class MalNumber extends MalValue {
   constructor(value) {
-    this.value = value;
+    super(value);
   }
 
-  toString(printReadably) {
+  toString() {
     return chalk.yellow(this.value.toString());
   }
 }
@@ -124,7 +126,7 @@ class MalIterable extends MalStruct {
   }
 
   beginsWith(symbol) {
-    return this.value.length > 0 && this.value[0] === symbol;
+    return this.value.length > 0 && this.value[0].value === symbol;
   }
 
   nth(n) {
@@ -256,4 +258,5 @@ module.exports = {
   MalAtom,
   printStr,
   MalIterable,
+  MalNumber,
 };

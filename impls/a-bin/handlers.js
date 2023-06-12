@@ -62,16 +62,13 @@ const handleDo = (ast, env, EVAL) => {
 };
 
 const handleIf = (ast, env, EVAL) => {
-  const [, cond, thenExp, elseExp] = ast.value;
+  const [, cond, ifExp, elseExp] = ast.value;
 
   const predicate = EVAL(cond, env);
   if (predicate.value !== false && !(predicate instanceof MalNil)) {
-    return thenExp;
+    return ifExp;
   }
-  if (elseExp === undefined) {
-    return new MalNil();
-  }
-  return elseExp;
+  return elseExp || new MalNil();
 };
 
 const handleFun = (ast, env, EVAL) => {
@@ -79,7 +76,7 @@ const handleFun = (ast, env, EVAL) => {
   const doForms = new MalList([new MalSymbol('do'), ...exprs]);
   const fun = (...args) => {
     const funEnv = new Env(env, binds.value, args);
-    return EVAL(ast.value[2], funEnv);
+    return EVAL(doForms, funEnv);
   };
   return new MalFun(doForms, binds.value, env, fun);
 };

@@ -22,6 +22,7 @@ const {
   macroExpand,
 } = require('./handlers');
 const { Env } = require('./env');
+
 core.env = new Env();
 Object.entries(core.ns).forEach(([key, fun]) => {
   core.env.set(new MalSymbol(key), fun);

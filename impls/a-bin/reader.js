@@ -80,10 +80,10 @@ const readMap = (reader) => {
 const readAtom = (reader) => {
   const token = reader.next();
   if (token.match(/^-?[\d]+$/)) {
-    return new MalValue(parseInt(token));
+    return new MalNumber(parseInt(token));
   }
   if (token.match(/^-?[\d]+.[\d]+$/)) {
-    return new MalValue(parseFloat(token));
+    return new MalNumber(parseFloat(token));
   }
   if (token.startsWith(':')) {
     return new MalKeyword(token);
